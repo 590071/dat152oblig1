@@ -1,0 +1,18 @@
+----------------------------------------------------------------
+Wed Aug 17 11:54:42 CEST 2022:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.15.2.0 - (1873585): instance a816c00e-0182-ab3a-0273-ffffb46a16bf 
+on database directory memory:/home/bki/eclipse/workspaces/dat152/h2022/taskservices/TaskServices/src/main/webapp/WEB-INF/lib/taskDB with class loader TomEEWebappClassLoader
+  context: TaskServices
+  delegate: false
+----------> Parent Classloader:
+java.net.URLClassLoader@4361bd48
+ 
+Loaded from file:/home/bki/progpakker/tomcat/instances/eclipse/h2021_taskserver/apache-tomee-microprofile-8.0.6/wtpwebapps/TaskServices/WEB-INF/lib/derby.jar
+java.vendor=Red Hat, Inc.
+java.runtime.version=11.0.16+8
+user.dir=/home/bki/eclipse/workspaces/dat152/h2022/taskservices/TaskServices/src/main/webapp/WEB-INF/lib
+os.name=Linux
+os.arch=amd64
+os.version=5.18.17-200.fc36.x86_64
+derby.system.home=/home/bki/eclipse/workspaces/dat152/h2022/taskservices/TaskServices/src/main/webapp/WEB-INF/lib
+Database Class Loader started - derby.database.classpath=''

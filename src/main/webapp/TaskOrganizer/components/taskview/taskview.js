@@ -17,11 +17,10 @@ template.innerHTML = `
     <task-box></task-box>`;
 
 /**
-  * TaskView
-  * The full application view
-  */
+ * TaskView
+ * The full application view
+ */
 class TaskView extends HTMLElement {
-
     #config = '../api/services'
     #taskList
 
@@ -32,42 +31,71 @@ class TaskView extends HTMLElement {
         const copy = template.content.cloneNode(true)
         this.#taskList = copy.querySelector("task-list")
         this.shadowRoot.appendChild(copy)
-        this.#fetchStatuses()
-        this.#fetchTasks()
 
-        this.shadowRoot.querySelector("#newtask button").disabled = false
+        ;(async () => {
+            await this.#fetchStatuses()
+            await this.#fetchTasks()
 
-        this.#taskList.changestatusCallback(
-            (id, newStatus) => {
-                console.log(`Status ${newStatus} for task ${id} approved`)
-            }
-        )
+            // Enable Button
+            this.shadowRoot.querySelector("#newtask button").disabled = false
 
-        this.#taskList.deletetaskCallback(
-            (id) => {
-                console.log(`Delete of task ${id} approved`)
-            }
-        )
+            this.#taskList.changestatusCallback(
+                async (id, newStatus) => {
+                    await this.#put(
+                        `/task/${id}`,
+                        "id",
+                        {status: newStatus}
+                    )
+                }
+            )
+
+            this.#taskList.deletetaskCallback(
+                async (id) => {
+                    await this.#delete(`/task/${id}`, id)
+                }
+            )
+        })()
     }
 
     async #fetchStatuses() {
-        this.#taskList.setStatuseslist(await this.#fetch("/allstatuses", "allstatuses"))
+        this.#taskList.setStatuseslist(await this.#get("/allstatuses", "allstatuses"))
     }
+
     async #fetchTasks() {
-        const tasks = await this.#fetch("/tasklist", "tasks")
+        const tasks = await this.#get("/tasklist", "tasks")
         tasks.forEach(task => this.#taskList.showTask(task))
-        console.log(this.shadowRoot)
-        this.shadowRoot.querySelector("#message p").textContent = `Found ${tasks.length} tasks.`
 
+        this.shadowRoot.querySelector("#message p").textContent = `Found ${tasks.length} tasks.`
     }
 
-    async #fetch(path, key) {
-        const url = this.#config + path
-        const res = await fetch(url)
-        const data = await res.json()
+    async #get(path, key) {
+        const data = await this.#fetch(path, "GET")
+
         return data[key]
     }
 
+    async #delete(path, key) {
+        const data = await this.#fetch(path, "DELETE")
+
+        return data[key]
+    }
+
+    async #put(path, key, payload) {
+        const data = await this.#fetch(path, "PUT", payload)
+
+        return data[key]
+    }
+
+    async #fetch(path, method, payload = undefined) {
+        const url = this.#config + path
+        const res = await fetch(url, {
+            method,
+            headers: {"Content-Type": "application/json; charset=utf-8"},
+            body: JSON.stringify(payload)
+        })
+
+        return await res.json()
+    }
 }
 
 customElements.define('task-view', TaskView);

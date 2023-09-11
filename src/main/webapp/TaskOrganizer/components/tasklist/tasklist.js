@@ -40,7 +40,7 @@ class TaskList extends HTMLElement {
     #changeCallback
     #deleteCallback
     /** @type {string[]} */
-    #allstatuses = []
+    #allStatuses = []
     #container
     #tbody
     #taskCount = 0
@@ -59,14 +59,14 @@ class TaskList extends HTMLElement {
         this.#container = copy.getElementById("tasklist");
         const table = tasktable.content.cloneNode(true).querySelector("table");
         this.#tbody = table.querySelector("tbody");
-        table.style.display = 'none'; // Initialize as hidden
+        table.style.display = 'none';
         this.#container.appendChild(table);
     }
 
     #toggleTable() {
         const table = this.#container.querySelector("table");
         if (table) {
-            if (this.getNumtasks() === 0) {
+            if (this.getNumTasks() === 0) {
                 table.style.display = 'none';
             } else {
                 table.style.display = 'table';
@@ -78,8 +78,8 @@ class TaskList extends HTMLElement {
      * @public
      * @param {string[]} list with all possible task statuses
      */
-    setStatuseslist(list) {
-        this.#allstatuses = list
+    setStatusesList(list) {
+        this.#allStatuses = list
     }
 
     /**
@@ -87,7 +87,7 @@ class TaskList extends HTMLElement {
      * @public
      * @param {function} callback
      */
-    changestatusCallback(callback) {
+    changeStatusCallback(callback) {
         this.#changeCallback = callback
     }
 
@@ -96,7 +96,7 @@ class TaskList extends HTMLElement {
      * @public
      * @param {function} callback
      */
-    deletetaskCallback(callback) {
+    deleteTaskCallback(callback) {
         this.#deleteCallback = callback
     }
 
@@ -117,22 +117,22 @@ class TaskList extends HTMLElement {
 
         const select = trTask.querySelector("select")
         if (select) {
-            const originalstatus = select.querySelector("option").value
-            this.#allstatuses.forEach(value => {
+            const originalStatus = select.querySelector("option").value
+            this.#allStatuses.forEach(value => {
                 const option = document.createElement("option")
                 option.textContent = value
                 option.value = value
                 select.appendChild(option)
             })
             select.addEventListener("change", () => {
-                const newstatus = select.value
-                if (newstatus !== originalstatus) {
-                    if (this.#changeCallback && confirm(`set '${task.title}' to ${newstatus}`)) {
-                        this.#changeCallback(task.id, newstatus)
-                        trTask.querySelector(".status").textContent = newstatus
+                const newStatus = select.value
+                if (newStatus !== originalStatus) {
+                    if (this.#changeCallback && confirm(`set '${task.title}' to ${newStatus}`)) {
+                        this.#changeCallback(task.id, newStatus)
+                        trTask.querySelector(".status").textContent = newStatus
                     }
                 }
-                select.value = originalstatus
+                select.value = originalStatus
             })
         }
 
@@ -180,7 +180,7 @@ class TaskList extends HTMLElement {
      * @public
      * @return {number} - Number of tasks on display in view
      */
-    getNumtasks() {
+    getNumTasks() {
         return this.#taskCount
     }
 

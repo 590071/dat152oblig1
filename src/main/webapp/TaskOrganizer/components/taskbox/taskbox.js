@@ -73,7 +73,7 @@ class TaskBox extends HTMLElement {
      * @public
      * @param{string[]} statusList
      */
-    setStatuseslist(statusList) {
+    setStatusesList(statusList) {
         this.#statusList = statusList
     }
 
@@ -82,7 +82,7 @@ class TaskBox extends HTMLElement {
      * @public
      * @param {Callback} callback
      */
-    newtaskCallback(callback) {
+    newTaskCallback(callback) {
         this.#callback = callback
     }
 

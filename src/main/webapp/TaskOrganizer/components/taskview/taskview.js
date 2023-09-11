@@ -50,7 +50,7 @@ class TaskView extends HTMLElement {
             const button = this.shadowRoot.querySelector("#newtask button")
             button.disabled = false
             button.addEventListener("click", () => {
-                this.#dialog.newtaskCallback(async (title, status) => {
+                this.#dialog.newTaskCallback(async (title, status) => {
                     const task = await this.#post(
                         "/task",
                         "task",
@@ -62,7 +62,7 @@ class TaskView extends HTMLElement {
                 this.#dialog.show()
             })
 
-            this.#taskList.changestatusCallback(
+            this.#taskList.changeStatusCallback(
                 async (id, newStatus) => {
                     await this.#put(
                         `/task/${id}`,
@@ -72,7 +72,7 @@ class TaskView extends HTMLElement {
                 }
             )
 
-            this.#taskList.deletetaskCallback(
+            this.#taskList.deleteTaskCallback(
                 async (id) => {
                     await this.#delete(`/task/${id}`, id)
                 }
@@ -83,8 +83,8 @@ class TaskView extends HTMLElement {
     async #fetchStatuses() {
         const allStatuses = await this.#get("/allstatuses", "allstatuses")
 
-        this.#taskList.setStatuseslist(allStatuses)
-        this.#dialog.setStatuseslist(allStatuses)
+        this.#taskList.setStatusesList(allStatuses)
+        this.#dialog.setStatusesList(allStatuses)
     }
 
     async #fetchTasks() {

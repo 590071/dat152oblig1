@@ -97,6 +97,8 @@ class TaskList extends HTMLElement {
          * @param {Task} task - Object representing a task
          */
         showTask(task) {
+                console.log(task)
+                /**@type {HTMLTableRowElement}*/
                 const trTask = taskrow.content.cloneNode(true).querySelector("tr")
 
                 trTask.dataset.id = task.id.toString()

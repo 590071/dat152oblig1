@@ -1,9 +1,15 @@
+/**
+ * @callback Callback
+ * @param {string} title
+ * @param {string} status
+ * @returns {void}
+ */
+
 const template = document.createElement("template");
 template.innerHTML = `
     <link rel="stylesheet" type="text/css" href="${import.meta.url.match(/.*\//)[0]}/taskbox.css"/>
 
     <dialog>
-       <!-- Modal content -->
         <span>&times;</span>
         <div>
             <div>Title:</div><div><input type="text" size="25" maxlength="80" placeholder="Task title" autofocus/></div>
@@ -13,60 +19,80 @@ template.innerHTML = `
      </dialog>`;
 
 /**
-  * TaskBox
-  * Manage view to add a new task
-  */
+ * TaskBox
+ * Manage view to add a new task
+ */
 class TaskBox extends HTMLElement {
+    #dialog
+    /** @type {string[]} */
+    #statusList = []
+    /** @type Callback */
+    #callback
 
-        constructor() {
-                super();
+    constructor() {
+        super();
 
-        /**
-         * Fill inn rest of code
-         */
-        }
+        this.attachShadow({mode: "open"})
 
-        /**
-         * Opens the modal box of view
-         * @public
-         */
-        show() {
-        /**
-         * Fill inn rest of code
-         */
-        }
+        const clone = template.content.cloneNode(true)
+        this.#dialog = clone.querySelector("dialog")
 
-        /**
-         * Set the list of possible task states
-         * @public
-         * @param{Array<Object>} statuslist
-         */
-        setStatuseslist(statuslist) {
-        /**
-         * Fill inn rest of code
-         */
-        }
+        this.shadowRoot.appendChild(clone)
+    }
 
-        /**
-         * Add callback to run at click on the "Add task" button
-         * @public
-         * @param {function} callback
-         */
-        newtaskCallback(callback) {
-        /**
-         * Fill inn rest of code
-         */
-        }
+    /**
+     * Opens the modal box of view
+     * @public
+     */
+    show() {
+        this.#dialog.show()
 
-        /**
-         * Closes the modal box
-         * @public
-         */
-        close() {
-        /**
-         * Fill inn rest of code
-         */
-        }
+        // populate the statuses
+        const select = this.shadowRoot.querySelector("select")
+        this.#statusList.forEach(status => {
+            const option = document.createElement("option")
+            option.value = status
+            option.textContent = status
+            select.appendChild(option)
+        })
+
+        const button = this.shadowRoot.querySelector("button")
+        button.addEventListener("click", () => {
+            if (this.#callback) {
+                const title = this.shadowRoot.querySelector("input").value
+
+                this.#callback(title, select.value)
+
+                this.close()
+            }
+        })
+    }
+
+    /**
+     * Set the list of possible task states
+     * @public
+     * @param{string[]} statusList
+     */
+    setStatuseslist(statusList) {
+        this.#statusList = statusList
+    }
+
+    /**
+     * Add callback to run at click on the "Add task" button
+     * @public
+     * @param {Callback} callback
+     */
+    newtaskCallback(callback) {
+        this.#callback = callback
+    }
+
+    /**
+     * Closes the modal box
+     * @public
+     */
+    close() {
+        this.#dialog.close()
+    }
 }
 
 customElements.define('task-box', TaskBox);

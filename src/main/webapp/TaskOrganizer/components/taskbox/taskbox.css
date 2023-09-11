@@ -1,7 +1,9 @@
 /* The Close Button */
 
 :host>dialog {
-    padding-top: 0px;
+    padding-top: 0;
+    position: absolute;
+    top: 10%; /* Move dialog up */
 }
 
 :host>dialog>span {

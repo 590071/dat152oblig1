@@ -21,23 +21,46 @@ template.innerHTML = `
  * The full application view
  */
 class TaskView extends HTMLElement {
-    #config = '../api/services'
+    #config = this.dataset.serviceurl
     #taskList
+    #dialog
 
     constructor() {
         super();
 
+
         this.attachShadow({mode: "open"})
         const copy = template.content.cloneNode(true)
         this.#taskList = copy.querySelector("task-list")
+        this.#dialog = copy.querySelector("task-box")
         this.shadowRoot.appendChild(copy)
+
+        if (!this.dataset.serviceurl) {
+            const error = "data-serviceurl is a required prop"
+
+            this.shadowRoot.querySelector("#message p").textContent = error
+            throw new Error(error)
+        }
 
         ;(async () => {
             await this.#fetchStatuses()
             await this.#fetchTasks()
 
             // Enable Button
-            this.shadowRoot.querySelector("#newtask button").disabled = false
+            const button = this.shadowRoot.querySelector("#newtask button")
+            button.disabled = false
+            button.addEventListener("click", () => {
+                this.#dialog.newtaskCallback(async (title, status) => {
+                    const task = await this.#post(
+                        "/task",
+                        "task",
+                        {title, status}
+                    )
+
+                    this.#taskList.showTask(task)
+                })
+                this.#dialog.show()
+            })
 
             this.#taskList.changestatusCallback(
                 async (id, newStatus) => {
@@ -58,7 +81,10 @@ class TaskView extends HTMLElement {
     }
 
     async #fetchStatuses() {
-        this.#taskList.setStatuseslist(await this.#get("/allstatuses", "allstatuses"))
+        const allStatuses = await this.#get("/allstatuses", "allstatuses")
+
+        this.#taskList.setStatuseslist(allStatuses)
+        this.#dialog.setStatuseslist(allStatuses)
     }
 
     async #fetchTasks() {
@@ -82,6 +108,12 @@ class TaskView extends HTMLElement {
 
     async #put(path, key, payload) {
         const data = await this.#fetch(path, "PUT", payload)
+
+        return data[key]
+    }
+
+    async #post(path, key, payload) {
+        const data = await this.#fetch(path, "POST", payload)
 
         return data[key]
     }

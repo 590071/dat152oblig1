@@ -24,21 +24,22 @@ class TaskView extends HTMLElement {
     #config = this.dataset.serviceurl
     #taskList
     #dialog
+    #message
 
     constructor() {
         super();
-
 
         this.attachShadow({mode: "open"})
         const copy = template.content.cloneNode(true)
         this.#taskList = copy.querySelector("task-list")
         this.#dialog = copy.querySelector("task-box")
+        this.#message = copy.querySelector("#message p")
         this.shadowRoot.appendChild(copy)
 
         if (!this.dataset.serviceurl) {
             const error = "data-serviceurl is a required prop"
 
-            this.shadowRoot.querySelector("#message p").textContent = error
+            this.#message.textContent = error
             throw new Error(error)
         }
 
@@ -58,6 +59,7 @@ class TaskView extends HTMLElement {
                     )
 
                     this.#taskList.showTask(task)
+                    this.#message.textContent = "Added 1 task"
                 })
                 this.#dialog.show()
             })
@@ -69,12 +71,14 @@ class TaskView extends HTMLElement {
                         "id",
                         {status: newStatus}
                     )
+                    this.#message.textContent = "Changed 1 task"
                 }
             )
 
             this.#taskList.deleteTaskCallback(
                 async (id) => {
                     await this.#delete(`/task/${id}`, id)
+                    this.#message.textContent = "Removed 1 task"
                 }
             )
         })()
@@ -91,7 +95,7 @@ class TaskView extends HTMLElement {
         const tasks = await this.#get("/tasklist", "tasks")
         tasks.forEach(task => this.#taskList.showTask(task))
 
-        this.shadowRoot.querySelector("#message p").textContent = `Found ${tasks.length} tasks.`
+        this.#message.textContent = `Found ${tasks.length} tasks.`
     }
 
     async #get(path, key) {

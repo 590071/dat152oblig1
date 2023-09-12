@@ -154,9 +154,7 @@ class TaskList extends HTMLElement {
                     this.removeTask(task.id)
                 }
             })
-
         }
-
 
         this.#tbody.insertBefore(trTask, this.#tbody.firstChild)
         this.#toggleTable()

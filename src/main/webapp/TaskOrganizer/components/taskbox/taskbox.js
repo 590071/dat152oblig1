@@ -28,6 +28,8 @@ class TaskBox extends HTMLElement {
     #statusList = []
     /** @type Callback */
     #callback
+    /** @type {function} */
+    #previousClickListener // Added this line to keep track of previous click listener
 
     constructor() {
         super();
@@ -49,6 +51,7 @@ class TaskBox extends HTMLElement {
 
         // populate the statuses
         const select = this.shadowRoot.querySelector("select")
+        select.innerHTML = ''; // Clear existing options
         this.#statusList.forEach(status => {
             const option = document.createElement("option")
             option.value = status
@@ -57,18 +60,27 @@ class TaskBox extends HTMLElement {
         })
 
         const button = this.shadowRoot.querySelector("button")
-        button.addEventListener("click", () => {
-            if (this.#callback) {
-                const title = this.shadowRoot.querySelector("input").value
+        if (this.#previousClickListener) {
+            button.removeEventListener("click", this.#previousClickListener)
+        }
 
-                this.#callback(title, select.value)
+        const newClickListener = () => {
+            const titleInput = this.shadowRoot.querySelector("input").value.trim()
+
+            // only allow input without an empty string
+            if (this.#callback && titleInput.length > 0) {
+                this.#callback(titleInput, select.value)
 
                 this.close()
             }
-        })
+        };
 
-        const closeButton = this.shadowRoot.querySelector("span")
-        closeButton.addEventListener("click", this.close)
+        button.addEventListener("click", newClickListener)
+
+        // Save the reference to the new click listener
+        this.#previousClickListener = newClickListener
+
+        this.shadowRoot.querySelector("span").addEventListener("click", this.close)
     }
 
     /**
@@ -94,6 +106,8 @@ class TaskBox extends HTMLElement {
      * @public
      */
     close() {
+        this.#dialog.querySelector("input").value = ""
+
         this.#dialog.close()
     }
 }

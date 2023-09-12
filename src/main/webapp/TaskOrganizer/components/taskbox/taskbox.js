@@ -66,6 +66,9 @@ class TaskBox extends HTMLElement {
                 this.close()
             }
         })
+
+        const closeButton = this.shadowRoot.querySelector("span")
+        closeButton.addEventListener("click", this.close)
     }
 
     /**

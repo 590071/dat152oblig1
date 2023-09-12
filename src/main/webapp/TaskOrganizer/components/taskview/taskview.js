@@ -17,18 +17,150 @@ template.innerHTML = `
     <task-box></task-box>`;
 
 /**
-  * TaskView
-  * The full application view
-  */
+ * TaskView
+ * The full application view
+ */
 class TaskView extends HTMLElement {
+    #config = this.dataset.serviceurl
+    #taskList
+    #dialog
+    #message
 
     constructor() {
         super();
 
         this.attachShadow({mode: "open"})
-        this.shadowRoot.appendChild(template.content.cloneNode(true))
+        const copy = template.content.cloneNode(true)
+        this.#taskList = copy.querySelector("task-list")
+        this.#dialog = copy.querySelector("task-box")
+        this.#message = copy.querySelector("#message p")
+        this.shadowRoot.appendChild(copy)
+
+        if (!this.dataset.serviceurl) {
+            const error = "data-serviceurl is a required prop"
+
+            this.#message.textContent = error
+            throw new Error(error)
+        }
+
+        ;(async () => {
+            await this.#fetchStatuses()
+            await this.#fetchTasks()
+
+            // Enable Button
+            const button = this.shadowRoot.querySelector("#newtask button")
+            button.disabled = false
+            button.addEventListener("click", () => {
+                this.#dialog.newTaskCallback(async (title, status) => {
+                    const task = await this.#post(
+                        "/task",
+                        "task",
+                        {title, status}
+                    )
+
+                    this.#taskList.showTask(task)
+                    this.#message.textContent = "Added 1 task"
+                })
+                this.#dialog.show()
+            })
+
+            this.#taskList.changeStatusCallback(
+                async (id, newStatus) => {
+                    await this.#put(
+                        `/task/${id}`,
+                        "id",
+                        {status: newStatus}
+                    )
+                    this.#message.textContent = "Changed 1 task"
+                }
+            )
+
+            this.#taskList.deleteTaskCallback(
+                async (id) => {
+                    await this.#delete(`/task/${id}`, id)
+                    this.#message.textContent = "Removed 1 task"
+                }
+            )
+        })()
     }
 
+    async #fetchStatuses() {
+        const allStatuses = await this.#get("/allstatuses", "allstatuses")
+
+        this.#taskList.setStatusesList(allStatuses)
+        this.#dialog.setStatusesList(allStatuses)
+    }
+
+    async #fetchTasks() {
+        /** @type Task[] */
+        const tasks = await this.#get("/tasklist", "tasks")
+        tasks.forEach(task => this.#taskList.showTask(task))
+
+        this.#message.textContent = `Found ${tasks.length} tasks.`
+    }
+
+    /**
+     * @param {string} path
+     * @param {string} key
+     * @returns {Promise<*>}
+     */
+    async #get(path, key) {
+        const data = await this.#fetch(path, "GET")
+
+        return data[key]
+    }
+
+    /**
+     * @param {string} path
+     * @param {string} key
+     * @returns {Promise<*>}
+     */
+    async #delete(path, key) {
+        const data = await this.#fetch(path, "DELETE")
+
+        return data[key]
+    }
+
+    /**
+     * @param {string} path
+     * @param {string} key
+     * @param {Record<string,?>} payload
+     * @returns {Promise<*>}
+     */
+    async #put(path, key, payload) {
+        const data = await this.#fetch(path, "PUT", payload)
+
+        return data[key]
+    }
+
+    /**
+     * @param {string} path
+     * @param {string} key
+     * @param {Record<string,?>} payload
+     * @returns {Promise<*>}
+     */
+    async #post(path, key, payload) {
+        const data = await this.#fetch(path, "POST", payload)
+
+        return data[key]
+    }
+
+    /**
+     * @param {string} path
+     * @param {"GET" | "POST" | "PUT" | "DELETE"} method
+     * @param {Record<string,?> | undefined} payload
+     * @returns {Promise<*>}
+     */
+    async #fetch(path, method, payload = undefined) {
+        const url = this.#config + path
+        const res = await fetch(url, {
+            method,
+            headers: {"Content-Type": "application/json; charset=utf-8"},
+            body: JSON.stringify(payload)
+        })
+
+        return await res.json()
+    }
 }
 
 customElements.define('task-view', TaskView);

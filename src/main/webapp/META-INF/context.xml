@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Context>         
-   <Resource name="jdbc/DAT152_TaskDB" auth="Container"
-       type="javax.sql.DataSource" 
-       username="organizer" password="8789yTgfr7"
-       driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
-       factory="org.apache.commons.dbcp2.BasicDataSourceFactory"
-       url="jdbc:derby:memory:taskDB;create=true"
-       />
+<Context>
+    <Resource name="jdbc/DAT152_TaskDB" auth="Container"
+              type="javax.sql.DataSource"
+              username="organizer" password="8789yTgfr7"
+              driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
+              factory="org.apache.commons.dbcp2.BasicDataSourceFactory"
+              url="jdbc:derby:memory:taskDB;create=true"
+    />
 </Context>

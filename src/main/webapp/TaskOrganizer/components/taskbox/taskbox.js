@@ -80,7 +80,7 @@ class TaskBox extends HTMLElement {
         // Save the reference to the new click listener
         this.#previousClickListener = newClickListener
 
-        this.shadowRoot.querySelector("span").addEventListener("click", this.close)
+        this.shadowRoot.querySelector("span").addEventListener("click", this.close.bind(this))
     }
 
     /**

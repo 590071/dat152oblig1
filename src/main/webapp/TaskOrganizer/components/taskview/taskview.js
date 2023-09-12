@@ -92,36 +92,65 @@ class TaskView extends HTMLElement {
     }
 
     async #fetchTasks() {
+        /** @type Task[] */
         const tasks = await this.#get("/tasklist", "tasks")
         tasks.forEach(task => this.#taskList.showTask(task))
 
         this.#message.textContent = `Found ${tasks.length} tasks.`
     }
 
+    /**
+     * @param {string} path
+     * @param {string} key
+     * @returns {Promise<*>}
+     */
     async #get(path, key) {
         const data = await this.#fetch(path, "GET")
 
         return data[key]
     }
 
+    /**
+     * @param {string} path
+     * @param {string} key
+     * @returns {Promise<*>}
+     */
     async #delete(path, key) {
         const data = await this.#fetch(path, "DELETE")
 
         return data[key]
     }
 
+    /**
+     * @param {string} path
+     * @param {string} key
+     * @param {Record<string,?>} payload
+     * @returns {Promise<*>}
+     */
     async #put(path, key, payload) {
         const data = await this.#fetch(path, "PUT", payload)
 
         return data[key]
     }
 
+    /**
+     * @param {string} path
+     * @param {string} key
+     * @param {Record<string,?>} payload
+     * @returns {Promise<*>}
+     */
     async #post(path, key, payload) {
         const data = await this.#fetch(path, "POST", payload)
 
         return data[key]
     }
 
+    /**
+     * @param {string} path
+     * @param {"GET" | "POST" | "PUT" | "DELETE"} method
+     * @param {Record<string,?> | undefined} payload
+     * @returns {Promise<*>}
+     */
     async #fetch(path, method, payload = undefined) {
         const url = this.#config + path
         const res = await fetch(url, {

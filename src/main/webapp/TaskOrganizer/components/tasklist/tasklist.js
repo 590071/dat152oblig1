@@ -5,21 +5,29 @@
  * @property {string} status
  */
 
+/**
+ *
+ * @callback TaskCallback
+ * @param {number} id
+ * @param {string} [status]
+ * @returns {void}
+ */
+
 const template = document.createElement("template");
 template.innerHTML = `
     <link rel="stylesheet" type="text/css" href="${import.meta.url.match(/.*\//)[0]}/tasklist.css"/>
 
     <div id="tasklist"></div>`;
 
-const tasktable = document.createElement("template");
-tasktable.innerHTML = `
+const taskTable = document.createElement("template");
+taskTable.innerHTML = `
     <table>
         <thead><tr><th>Task</th><th>Status</th></tr></thead>
         <tbody></tbody>
     </table>`;
 
-const taskrow = document.createElement("template");
-taskrow.innerHTML = `
+const taskRow = document.createElement("template");
+taskRow.innerHTML = `
     <tr>
         <td class="name"></td>
         <td class="status"></td>
@@ -36,12 +44,14 @@ taskrow.innerHTML = `
  * Manage view with list of tasks
  */
 class TaskList extends HTMLElement {
-
+    /** @type {TaskCallback} */
     #changeCallback
     #deleteCallback
     /** @type {string[]} */
     #allStatuses = []
+    /** @type {HTMLDivElement} */
     #container
+    /** @type {HTMLTableSectionElement} */
     #tbody
     #taskCount = 0
 
@@ -57,7 +67,7 @@ class TaskList extends HTMLElement {
     #init() {
         const copy = template.content.cloneNode(true);
         this.#container = copy.getElementById("tasklist");
-        const table = tasktable.content.cloneNode(true).querySelector("table");
+        const table = taskTable.content.cloneNode(true).querySelector("table");
         this.#tbody = table.querySelector("tbody");
         table.style.display = 'none';
         this.#container.appendChild(table);
@@ -85,7 +95,7 @@ class TaskList extends HTMLElement {
     /**
      * Add callback to run on change of status of a task, i.e. on change in the SELECT element
      * @public
-     * @param {function} callback
+     * @param {TaskCallback} callback
      */
     changeStatusCallback(callback) {
         this.#changeCallback = callback
@@ -94,7 +104,7 @@ class TaskList extends HTMLElement {
     /**
      * Add callback to run on click on delete button of a task
      * @public
-     * @param {function} callback
+     * @param {TaskCallback} callback
      */
     deleteTaskCallback(callback) {
         this.#deleteCallback = callback
@@ -109,7 +119,7 @@ class TaskList extends HTMLElement {
         this.#taskCount++
 
         /**@type {HTMLTableRowElement}*/
-        const trTask = taskrow.content.cloneNode(true).querySelector("tr")
+        const trTask = taskRow.content.cloneNode(true).querySelector("tr")
 
         trTask.dataset.id = task.id.toString()
         trTask.querySelector(".status").textContent = task.status
@@ -129,7 +139,7 @@ class TaskList extends HTMLElement {
                 if (newStatus !== originalStatus) {
                     if (this.#changeCallback && confirm(`set '${task.title}' to ${newStatus}`)) {
                         this.#changeCallback(task.id, newStatus)
-                        trTask.querySelector(".status").textContent = newStatus
+                        this.updateTask({...task, status: newStatus})
                     }
                 }
                 select.value = originalStatus
